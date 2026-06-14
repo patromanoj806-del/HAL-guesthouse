@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - HAL Guest House</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#0f172a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{width:900px;background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;color:white;box-shadow:0 25px 60px rgba(0,0,0,0.5);}
+.logo{display:block;margin:0 auto 10px;width:110px;background:rgba(255,255,255,0.92);padding:8px;border-radius:12px;}
+.page-title{text-align:center;font-size:22px;font-weight:700;}
+.page-sub{text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin-bottom:28px;}
+.form-label{color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:5px;}
+.form-control,.form-select{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:white;border-radius:10px;height:48px;font-size:14px;}
+.form-control:focus,.form-select:focus{background:rgba(255,255,255,0.12);border-color:#00c8ff;box-shadow:0 0 0 3px rgba(0,200,255,0.15);color:white;}
+.form-control::placeholder{color:rgba(255,255,255,0.3);}
+.form-select option{background:#1e3a8a;color:white;}
+.err{color:#f87171;font-size:12px;margin-top:3px;display:none;}
+.btn-reg{width:100%;height:50px;background:linear-gradient(135deg,#00c8ff,#0080ff);border:none;border-radius:12px;font-size:16px;font-weight:700;color:white;margin-top:6px;transition:.3s;}
+.btn-reg:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,200,255,0.4);}
+.btn-reg:disabled{opacity:.6;transform:none;}
+.login-row{text-align:center;margin-top:14px;font-size:13px;color:rgba(255,255,255,0.5);}
+.login-row a{color:#00c8ff;text-decoration:none;font-weight:600;}
+.msg-box{border-radius:10px;padding:11px 14px;font-size:13px;font-weight:500;margin-top:14px;display:none;text-align:center;}
+.msg-error{background:rgba(220,38,38,0.18);color:#fca5a5;border:1px solid rgba(220,38,38,0.3);}
+.msg-success{background:rgba(22,163,74,0.18);color:#86efac;border:1px solid rgba(22,163,74,0.3);}
+.msg-loading{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#00c8ff;margin:16px 0 12px;border-bottom:1px solid rgba(0,200,255,0.2);padding-bottom:6px;}
+.pw-strength{height:4px;border-radius:2px;margin-top:6px;background:rgba(255,255,255,0.1);overflow:hidden;}
+.pw-strength-bar{height:100%;border-radius:2px;width:0;transition:.3s;}
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="https://th.bing.com/th/id/OIP.iEX9U9df1k-oeO1bUktfwwHaD5?w=341&h=180&c=7&r=0&o=7&pid=1.7&rm=3" class="logo">
+  <div class="page-title">Create New Account</div>
+  <div class="page-sub">HAL Guest House Employee Registration</div>
+
+  <div class="section-label">Personal Information</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">PB Number <span style="color:#f87171">*</span></label>
+      <input type="text" id="pbNo" class="form-control" placeholder="e.g. PB12345">
+      <div class="err" id="e-pbNo">PB Number is required</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Full Name <span style="color:#f87171">*</span></label>
+      <input type="text" id="empName" class="form-control" placeholder="Your full name">
+      <div class="err" id="e-empName">Full name is required</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Gender</label>
+      <select id="gender" class="form-select">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Date of Joining</label>
+      <input type="date" id="doj" class="form-control">
+    </div>
+  </div>
+
+  <div class="section-label">Work Information</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Department <span style="color:#f87171">*</span></label>
+      <input type="text" id="dept" class="form-control" placeholder="e.g. Production, Quality">
+      <div class="err" id="e-dept">Department is required</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Designation</label>
+      <input type="text" id="desig" class="form-control" placeholder="e.g. Engineer, Manager">
+    </div>
+  </div>
+
+  <div class="section-label">Contact Information</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Mobile Number <span style="color:#f87171">*</span></label>
+      <input type="tel" id="mobile" class="form-control" placeholder="10-digit mobile number" maxlength="10">
+      <div class="err" id="e-mobile">Enter valid 10-digit mobile number</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Email Address <span style="color:#f87171">*</span></label>
+      <input type="email" id="email" class="form-control" placeholder="yourname@hal.in">
+      <div class="err" id="e-email">Enter valid email address</div>
+    </div>
+  </div>
+
+  <div class="section-label">Account Security</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Password <span style="color:#f87171">*</span></label>
+      <input type="password" id="password" class="form-control" placeholder="Min 6 characters" oninput="checkStrength()">
+      <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+      <div class="err" id="e-password">Password must be at least 6 characters</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Confirm Password <span style="color:#f87171">*</span></label>
+      <input type="password" id="confirmPw" class="form-control" placeholder="Re-enter password">
+      <div class="err" id="e-confirmPw">Passwords do not match</div>
+    </div>
+  </div>
+
+  <button class="btn-reg mt-4" id="regBtn" onclick="register()">
+    <i class="bi bi-person-check me-2"></i>Create Account
+  </button>
+  <div class="msg-box" id="msgBox"></div>
+  <div class="login-row">Already have an account? <a href="login.html">Sign In</a></div>
+</div>
+
+<script>
+const API = "http://localhost:8080/api";
+
+function showMsg(msg, type) {
+  const el = document.getElementById("msgBox");
+  el.className = "msg-box msg-" + type;
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function checkStrength() {
+  const pw = document.getElementById("password").value;
+  const bar = document.getElementById("pwBar");
+  if (pw.length === 0) { bar.style.width = "0"; return; }
+  if (pw.length < 4) { bar.style.width = "25%"; bar.style.background = "#ef4444"; }
+  else if (pw.length < 6) { bar.style.width = "50%"; bar.style.background = "#f59e0b"; }
+  else if (pw.length < 10) { bar.style.width = "75%"; bar.style.background = "#10b981"; }
+  else { bar.style.width = "100%"; bar.style.background = "#00c8ff"; }
+}
+
+function validateField(id, errId, check) {
+  const val = document.getElementById(id).value;
+  const valid = check(val);
+  document.getElementById(errId).style.display = valid ? "none" : "block";
+  return valid;
+}
+
+function validate() {
+  let ok = true;
+  ok &= validateField("pbNo", "e-pbNo", v => v.trim().length > 0);
+  ok &= validateField("empName", "e-empName", v => v.trim().length > 0);
+  ok &= validateField("dept", "e-dept", v => v.trim().length > 0);
+  ok &= validateField("mobile", "e-mobile", v => /^[0-9]{10}$/.test(v.trim()));
+  ok &= validateField("email", "e-email", v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()));
+  ok &= validateField("password", "e-password", v => v.length >= 6);
+  ok &= validateField("confirmPw", "e-confirmPw", v => v === document.getElementById("password").value);
+  return !!ok;
+}
+
+async function register() {
+  if (!validate()) { showMsg("Please fix the highlighted errors before submitting.", "error"); return; }
+
+  const btn = document.getElementById("regBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...';
+  showMsg("Submitting your registration...", "loading");
+
+  const payload = {
+    pbNo: document.getElementById("pbNo").value.trim(),
+    employeeName: document.getElementById("empName").value.trim(),
+    password: document.getElementById("password").value,
+    department: document.getElementById("dept").value.trim(),
+    designation: document.getElementById("desig").value.trim(),
+    mobileNumber: document.getElementById("mobile").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    gender: document.getElementById("gender").value,
+    dateOfJoining: document.getElementById("doj").value || null
+  };
+
+  try {
+    const r = await fetch(`${API}/register`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+    const result = await r.text();
+    if (result === "REGISTRATION_SUCCESS") {
+      showMsg("Account created successfully! Redirecting to login...", "success");
+      setTimeout(() => window.location.href = "login.html", 2000);
+    } else if (result === "PB_NO_ALREADY_EXISTS") {
+      showMsg("This PB Number is already registered. Please login instead.", "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-check me-2"></i>Create Account';
+    } else {
+      showMsg("Registration failed. Please try again.", "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-check me-2"></i>Create Account';
+    }
+  } catch(e) {
+    showMsg("Cannot connect to server. Please make sure Spring Boot is running on port 8080.", "error");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-person-check me-2"></i>Create Account';
+  }
+}
+</script>
+</body>
+</html>

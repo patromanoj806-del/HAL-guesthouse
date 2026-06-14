@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - HAL Guest House</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:#f1f5f9;display:flex;min-height:100vh;}
+.sidebar{width:240px;background:#0f172a;min-height:100vh;position:fixed;left:0;top:0;z-index:100;display:flex;flex-direction:column;}
+.sidebar-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sidebar-logo img{width:88px;background:rgba(255,255,255,0.92);padding:6px;border-radius:10px;display:block;}
+.sidebar-logo .title{color:white;font-size:13px;font-weight:700;margin-top:8px;}
+.sidebar-logo .sub{color:rgba(255,255,255,0.4);font-size:11px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:12px 20px;color:rgba(255,255,255,0.55);text-decoration:none;font-size:14px;transition:.2s;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:white;}
+.nav-item.active{background:rgba(0,200,255,0.1);color:#00c8ff;border-left-color:#00c8ff;}
+.nav-item i{width:18px;}
+.sidebar-bottom{margin-top:auto;padding:16px 0;border-top:1px solid rgba(255,255,255,0.07);}
+.main{margin-left:240px;flex:1;padding:28px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.topbar h4{font-weight:800;color:#0f172a;}
+.topbar p{color:#64748b;font-size:13px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat-card{background:white;border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;align-items:center;gap:12px;}
+.stat-card .ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.stat-card .num{font-size:24px;font-weight:800;color:#0f172a;}
+.stat-card .lbl{font-size:12px;color:#64748b;}
+.card-box{background:white;border-radius:18px;padding:22px;box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+.filter-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+.filter-row input{flex:1;min-width:220px;border:1px solid #e2e8f0;border-radius:10px;padding:9px 14px;font-size:14px;}
+.filter-row input:focus{outline:none;border-color:#1e40af;}
+.filter-row select{border:1px solid #e2e8f0;border-radius:10px;padding:9px 14px;font-size:14px;color:#334155;background:white;}
+.table{font-size:13.5px;}
+.table thead th{background:#f8fafc;color:#475569;font-weight:600;border:none;padding:13px 14px;white-space:nowrap;}
+.table tbody td{padding:12px 14px;border-color:#f1f5f9;vertical-align:middle;}
+.table tbody tr:hover{background:#fafafa;}
+.badge-s{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-PENDING{background:#fef3c7;color:#92400e;}
+.badge-APPROVED{background:#dcfce7;color:#166534;}
+.badge-REJECTED{background:#fee2e2;color:#991b1b;}
+.badge-CHECKED_IN{background:#dbeafe;color:#1e40af;}
+.badge-CHECKED_OUT{background:#f1f5f9;color:#475569;}
+.btn-approve{background:#16a34a;color:white;border:none;padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px;}
+.btn-reject{background:#dc2626;color:white;border:none;padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px;}
+.btn-view{background:#2563eb;color:white;border:none;padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px;}
+.btn-approve:hover{background:#15803d;}
+.btn-reject:hover{background:#b91c1c;}
+.btn-view:hover{background:#1d4ed8;}
+.empty{text-align:center;padding:60px;color:#94a3b8;}
+.empty i{font-size:48px;display:block;margin-bottom:10px;}
+.modal-content{border-radius:18px;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+.modal-header{background:#0f172a;color:white;border-radius:18px 18px 0 0;padding:20px 24px;}
+.btn-close{filter:invert(1);}
+.room-opt{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:14px;background:white;color:#334155;}
+.room-opt:focus{outline:none;border-color:#1e40af;}
+/* Confirm overlay */
+.confirm-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9997;display:none;}
+.confirm-box{background:white;border-radius:18px;padding:30px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.confirm-box .icon{font-size:44px;margin-bottom:10px;}
+.confirm-box h5{font-weight:700;color:#0f172a;margin-bottom:6px;}
+.confirm-box p{color:#64748b;font-size:14px;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;}
+/* Toast */
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;}
+.toast-item{display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:12px;color:white;font-size:14px;min-width:280px;box-shadow:0 8px 25px rgba(0,0,0,0.18);animation:tin .35s ease;margin-bottom:8px;}
+.t-success{background:#16a34a;}.t-error{background:#dc2626;}.t-info{background:#2563eb;}
+@keyframes tin{from{transform:translateX(120px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+</style>
+</head>
+<body>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-bg" id="confirmBg">
+  <div class="confirm-box">
+    <div class="icon" id="cIcon">⚠️</div>
+    <h5 id="cTitle">Confirm</h5>
+    <p id="cMsg">Are you sure?</p>
+    <div class="confirm-btns">
+      <button id="cYes" class="btn btn-sm btn-danger px-4 py-2">Confirm</button>
+      <button class="btn btn-sm btn-outline-secondary px-4 py-2" onclick="document.getElementById('confirmBg').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://th.bing.com/th/id/OIP.iEX9U9df1k-oeO1bUktfwwHaD5?w=341&h=180&c=7&r=0&o=7&pid=1.7&rm=3">
+    <div class="title">HAL Guest House</div>
+    <div class="sub">Koraput Division</div>
+  </div>
+  <div style="padding:10px 0;">
+    <a href="dashboard1.html" class="nav-item"><i class="bi bi-speedometer2"></i>Dashboard</a>
+    <a href="book-room.html" class="nav-item"><i class="bi bi-calendar-plus"></i>Book Room</a>
+    <a href="room-availibility.html" class="nav-item"><i class="bi bi-door-open"></i>Room Availability</a>
+    <a href="booking-status.html" class="nav-item"><i class="bi bi-clipboard-check"></i>Booking Status</a>
+    <a href="admin-approval.html" class="nav-item active"><i class="bi bi-shield-check"></i>Admin Panel</a>
+    <a href="checkin.html" class="nav-item"><i class="bi bi-box-arrow-in-right"></i>Check In</a>
+    <a href="checkout.html" class="nav-item"><i class="bi bi-box-arrow-right"></i>Check Out</a>
+    <a href="bill-generation.html" class="nav-item"><i class="bi bi-receipt"></i>Bill</a>
+    <a href="profile.html" class="nav-item"><i class="bi bi-person-circle"></i>My Profile</a>
+  </div>
+  <div class="sidebar-bottom">
+    <a href="login.html" class="nav-item" onclick="localStorage.clear()"><i class="bi bi-box-arrow-left"></i>Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div><h4>Admin Approval Panel</h4><p>Review booking requests and assign rooms</p></div>
+    <button onclick="loadAll()" style="background:#1e40af;color:white;border:none;border-radius:10px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="ico" style="background:#eff6ff;color:#1e40af"><i class="bi bi-journal-text"></i></div><div><div class="num" id="sTotal">-</div><div class="lbl">Total Requests</div></div></div>
+    <div class="stat-card"><div class="ico" style="background:#fefce8;color:#ca8a04"><i class="bi bi-hourglass-split"></i></div><div><div class="num" id="sPending">-</div><div class="lbl">Pending</div></div></div>
+    <div class="stat-card"><div class="ico" style="background:#f0fdf4;color:#16a34a"><i class="bi bi-check-circle"></i></div><div><div class="num" id="sApproved">-</div><div class="lbl">Approved</div></div></div>
+    <div class="stat-card"><div class="ico" style="background:#fee2e2;color:#dc2626"><i class="bi bi-x-circle"></i></div><div><div class="num" id="sRejected">-</div><div class="lbl">Rejected</div></div></div>
+  </div>
+
+  <div class="card-box">
+    <div class="filter-row">
+      <input type="text" id="searchIn" placeholder="🔍  Search by Booking ID or Guest Name..." oninput="filterTable()">
+      <select id="statusFil" onchange="filterTable()">
+        <option value="">All Requests</option>
+        <option value="PENDING">Pending</option>
+        <option value="APPROVED">Approved</option>
+        <option value="REJECTED">Rejected</option>
+        <option value="CHECKED_IN">Checked In</option>
+      </select>
+    </div>
+    <div id="tableArea"><div class="empty"><div class="spinner-border text-primary"></div><p class="mt-2" style="font-size:14px;">Loading requests...</p></div></div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>Approve Booking</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:16px;font-size:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:#64748b;">Booking ID</span><strong id="mBid"></strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:#64748b;">Guest</span><strong id="mGuest"></strong></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#64748b;">Preferred Room Type</span><strong id="mType"></strong></div>
+        </div>
+        <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;color:#0f172a;">Assign Available Room</label>
+        <select id="roomSel" class="room-opt"><option value="">Loading rooms...</option></select>
+        <div id="noRoomMsg" style="display:none;color:#dc2626;font-size:13px;margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:8px;">
+          <i class="bi bi-exclamation-triangle me-1"></i>No rooms available of this type. Showing all available rooms.
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 px-4 pb-4">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn" style="background:#16a34a;color:white;font-weight:600;" onclick="doApprove()">
+          <i class="bi bi-check2 me-1"></i>Confirm Approval
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = "http://localhost:8080/api";
+let allBookings = [];
+let currentBid = "";
+
+function toast(msg, type="info") {
+  const icons = {success:"bi-check-circle-fill",error:"bi-x-circle-fill",info:"bi-info-circle-fill"};
+  const d = document.createElement("div");
+  d.className = `toast-item t-${type}`;
+  d.innerHTML = `<i class="bi ${icons[type]||'bi-info-circle-fill'}"></i><span>${msg}</span>`;
+  document.getElementById("toastWrap").appendChild(d);
+  setTimeout(() => d.remove(), 4000);
+}
+
+function confirm2(icon, title, msg, btnLabel, btnClass, onYes) {
+  document.getElementById("cIcon").textContent = icon;
+  document.getElementById("cTitle").textContent = title;
+  document.getElementById("cMsg").textContent = msg;
+  const yBtn = document.getElementById("cYes");
+  yBtn.className = `btn btn-sm ${btnClass} px-4 py-2`;
+  yBtn.textContent = btnLabel;
+  document.getElementById("confirmBg").style.display = "flex";
+  yBtn.onclick = () => { document.getElementById("confirmBg").style.display = "none"; onYes(); };
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/bookings/stats`);
+    const d = await r.json();
+    document.getElementById("sTotal").textContent = d.total||0;
+    document.getElementById("sPending").textContent = d.pending||0;
+    document.getElementById("sApproved").textContent = d.approved||0;
+    document.getElementById("sRejected").textContent = d.rejected||0;
+  } catch(e) {}
+}
+
+async function loadAll() {
+  document.getElementById("tableArea").innerHTML = '<div class="empty"><div class="spinner-border text-primary"></div><p class="mt-2" style="font-size:14px;">Loading...</p></div>';
+  try {
+    const r = await fetch(`${API}/bookings`);
+    if (!r.ok) throw new Error();
+    allBookings = await r.json();
+    renderTable(allBookings);
+    loadStats();
+  } catch(e) {
+    document.getElementById("tableArea").innerHTML = `<div class="empty"><i class="bi bi-wifi-off"></i><p style="font-size:15px;font-weight:600;">Cannot connect to server</p><p style="font-size:13px;">Make sure Spring Boot is running on port 8080</p><button onclick="loadAll()" style="margin-top:12px;background:#1e40af;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Retry</button></div>`;
+    toast("Cannot connect to backend server", "error");
+  }
+}
+
+function renderTable(bookings) {
+  if (!bookings.length) {
+    document.getElementById("tableArea").innerHTML = `<div class="empty"><i class="bi bi-inbox"></i><p>No bookings found</p></div>`;
+    return;
+  }
+  let html = `<div style="overflow-x:auto;"><table class="table"><thead><tr>
+    <th>Booking ID</th><th>Guest Name</th><th>PB No</th>
+    <th>Room Type</th><th>Check In</th><th>Check Out</th><th>Room</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>`;
+  bookings.forEach(b => {
+    html += `<tr>
+      <td><strong>${b.bookingId}</strong></td>
+      <td>${b.guestName}</td>
+      <td>${b.employee?.pbNo||'-'}</td>
+      <td>${b.preferredRoomType}</td>
+      <td>${b.checkInDate}</td>
+      <td>${b.checkOutDate}</td>
+      <td>${b.room?.roomNumber||'<span style="color:#94a3b8">—</span>'}</td>
+      <td><span class="badge-s badge-${b.status}">${b.status.replace('_',' ')}</span></td>
+      <td>
+        ${b.status==='PENDING' ? `
+          <button class="btn-approve" onclick='openApprove("${b.bookingId}","${b.guestName}","${b.preferredRoomType}")'><i class="bi bi-check2"></i> Approve</button>
+          <button class="btn-reject" onclick='doReject("${b.bookingId}","${b.guestName}")'><i class="bi bi-x"></i> Reject</button>
+        ` : ''}
+        ${b.status==='APPROVED' ? `<button class="btn-approve" onclick="window.location.href='checkin.html'"><i class="bi bi-box-arrow-in-right"></i> Check In</button>` : ''}
+        <button class="btn-view" onclick='viewDetail(${JSON.stringify(b).replace(/'/g,"&#39;")})'><i class="bi bi-eye"></i></button>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  document.getElementById("tableArea").innerHTML = html;
+}
+
+async function openApprove(bookingId, guestName, roomType) {
+  currentBid = bookingId;
+  document.getElementById("mBid").textContent = bookingId;
+  document.getElementById("mGuest").textContent = guestName;
+  document.getElementById("mType").textContent = roomType;
+  document.getElementById("roomSel").innerHTML = '<option value="">Loading available rooms...</option>';
+  document.getElementById("noRoomMsg").style.display = "none";
+  new bootstrap.Modal(document.getElementById("approveModal")).show();
+
+  try {
+    // First try preferred room type
+    let r = await fetch(`${API}/rooms/available/${roomType}`);
+    let rooms = await r.json();
+    if (!rooms.length) {
+      document.getElementById("noRoomMsg").style.display = "block";
+      r = await fetch(`${API}/rooms/available`);
+      rooms = await r.json();
+    }
+    if (!rooms.length) {
+      document.getElementById("roomSel").innerHTML = '<option value="">No available rooms at this time</option>';
+    } else {
+      document.getElementById("roomSel").innerHTML = '<option value="">-- Select a Room --</option>' +
+        rooms.map(rm => `<option value="${rm.roomNumber}">Room ${rm.roomNumber} — ${rm.roomType} — ₹${rm.ratePerDay}/day</option>`).join('');
+    }
+  } catch(e) {
+    document.getElementById("roomSel").innerHTML = '<option value="">Error loading rooms</option>';
+  }
+}
+
+async function doApprove() {
+  const roomNumber = document.getElementById("roomSel").value;
+  if (!roomNumber) { toast("Please select a room to assign", "error"); return; }
+
+  try {
+    const r = await fetch(`${API}/bookings/${currentBid}/approve`, {
+      method: "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({roomNumber})
+    });
+    const d = await r.json();
+    bootstrap.Modal.getInstance(document.getElementById("approveModal")).hide();
+    if (d.result === "APPROVED") {
+      toast(`Booking ${currentBid} approved — Room ${roomNumber} assigned successfully`, "success");
+      loadAll();
+    } else {
+      toast("Approval failed. Please try again.", "error");
+    }
+  } catch(e) { toast("Error connecting to server", "error"); }
+}
+
+function doReject(bookingId, guestName) {
+  confirm2("🚫", "Reject Booking", `Reject booking ${bookingId} for ${guestName}? This action cannot be undone.`, "Reject", "btn-danger", async () => {
+    try {
+      const r = await fetch(`${API}/bookings/${bookingId}/reject`, {method:"PUT"});
+      const d = await r.json();
+      if (d.result === "REJECTED") { toast(`Booking ${bookingId} has been rejected`, "info"); loadAll(); }
+    } catch(e) { toast("Error rejecting booking", "error"); }
+  });
+}
+
+function viewDetail(b) {
+  toast(`${b.bookingId} | ${b.guestName} | ${b.status} | Room: ${b.room?.roomNumber||'Not Assigned'}`, "info");
+}
+
+function filterTable() {
+  const q = document.getElementById("searchIn").value.toLowerCase();
+  const s = document.getElementById("statusFil").value;
+  renderTable(allBookings.filter(b =>
+    (!q || b.bookingId.toLowerCase().includes(q) || b.guestName.toLowerCase().includes(q)) &&
+    (!s || b.status === s)
+  ));
+}
+
+loadAll();
+</script>
+</body>
+</html>
