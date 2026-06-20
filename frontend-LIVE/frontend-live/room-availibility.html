@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAL Room Availability</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body{background:#f4f7fc;font-family:'Segoe UI',sans-serif;}
+.header{background:linear-gradient(135deg,#0f172a,#1e40af);color:white;padding:25px;text-align:center;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;padding:20px;}
+.stat-card{background:white;padding:20px;border-radius:15px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.1);}
+.room-section{padding:20px;}
+.floor-title{margin-top:20px;margin-bottom:15px;font-weight:bold;color:#1e40af;}
+.room-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;}
+.room{padding:15px;border-radius:12px;text-align:center;font-weight:bold;cursor:pointer;transition:.3s;color:white;}
+.room:hover{transform:scale(1.08);}
+.available{background:#16a34a;}.occupied{background:#dc2626;}.reserved{background:#2563eb;}.maintenance{background:#eab308;color:black;}
+.search-box{padding:20px;}
+.legend{padding:20px;display:flex;gap:20px;flex-wrap:wrap;}
+.badge-box{padding:8px 15px;border-radius:20px;color:white;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>HAL Guest House</h1>
+  <h4>ROOM AVAILABILITY CONTROL CENTER</h4>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><h3 id="statTotal">-</h3><p>Total Rooms</p></div>
+  <div class="stat-card"><h3 id="statAvailable">-</h3><p>Available</p></div>
+  <div class="stat-card"><h3 id="statOccupied">-</h3><p>Occupied</p></div>
+  <div class="stat-card"><h3 id="statReserved">-</h3><p>Reserved</p></div>
+  <div class="stat-card"><h3 id="statMaintenance">-</h3><p>Maintenance</p></div>
+</div>
+
+<div class="search-box">
+  <input type="text" id="searchInput" class="form-control" placeholder="Search Room Number..." oninput="filterRooms()">
+</div>
+
+<div class="legend">
+  <div class="badge-box available">Available</div>
+  <div class="badge-box occupied">Occupied</div>
+  <div class="badge-box reserved">Reserved</div>
+  <div class="badge-box maintenance" style="background:#eab308;color:black">Maintenance</div>
+</div>
+
+<div class="room-section" id="roomSection">
+  <p class="text-center">Loading rooms...</p>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="roomModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5>Room Details</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="roomInfo"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = "https://hal-backend-production.up.railway.app/api";
+let allRooms = [];
+
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/rooms/stats`);
+    const d = await r.json();
+    document.getElementById("statTotal").textContent = d.total || 0;
+    document.getElementById("statAvailable").textContent = d.available || 0;
+    document.getElementById("statOccupied").textContent = d.occupied || 0;
+    document.getElementById("statReserved").textContent = d.reserved || 0;
+    document.getElementById("statMaintenance").textContent = d.maintenance || 0;
+  } catch(e) {}
+}
+
+async function loadRooms() {
+  try {
+    const r = await fetch(`${API}/rooms`);
+    allRooms = await r.json();
+    renderRooms(allRooms);
+  } catch(e) {
+    document.getElementById("roomSection").innerHTML = '<p class="text-danger text-center">Cannot connect to server</p>';
+  }
+}
+
+function renderRooms(rooms) {
+  // Group by floor
+  const floors = {};
+  rooms.forEach(room => {
+    const f = room.floor || 1;
+    if (!floors[f]) floors[f] = [];
+    floors[f].push(room);
+  });
+
+  const statusClass = {AVAILABLE:'available', OCCUPIED:'occupied', RESERVED:'reserved', MAINTENANCE:'maintenance'};
+  const floorNames = {1:'Ground Floor', 2:'First Floor', 3:'Second Floor'};
+
+  let html = '';
+  Object.keys(floors).sort().forEach(floor => {
+    const roomsInFloor = floors[floor];
+    const firstRoom = roomsInFloor[0].roomNumber;
+    const lastRoom = roomsInFloor[roomsInFloor.length-1].roomNumber;
+    html += `<h4 class="floor-title">${floorNames[floor] || 'Floor ' + floor} (${firstRoom}-${lastRoom})</h4>`;
+    html += `<div class="room-grid">`;
+    roomsInFloor.forEach(room => {
+      const cls = statusClass[room.status] || 'available';
+      html += `<div class="room ${cls}" onclick="showRoom('${room.roomNumber}', '${room.status}', '${room.roomType}', ${room.ratePerDay})">${room.roomNumber}</div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById("roomSection").innerHTML = html;
+}
+
+function showRoom(roomNo, status, type, rate) {
+  document.getElementById("roomInfo").innerHTML = `
+    <p><strong>Room No:</strong> ${roomNo}</p>
+    <p><strong>Status:</strong> <strong>${status}</strong></p>
+    <p><strong>Room Type:</strong> ${type}</p>
+    <p><strong>Rate Per Day:</strong> ₹${rate}</p>
+  `;
+  new bootstrap.Modal(document.getElementById('roomModal')).show();
+}
+
+function filterRooms() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  renderRooms(allRooms.filter(r => r.roomNumber.toLowerCase().includes(q)));
+}
+
+loadStats();
+loadRooms();
+</script>
+</body>
+</html>
